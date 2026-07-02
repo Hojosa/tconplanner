@@ -1,22 +1,36 @@
 package net.tiffit.tconplanner.data;
 
+import java.lang.reflect.Field;
+import java.util.Objects;
+
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
+import slimeknights.tconstruct.library.recipe.modifiers.adding.IncrementalModifierRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.library.tools.SlotType;
-
-import java.util.Objects;
 
 public class ModifierInfo {
 
     public final IDisplayModifierRecipe recipe;
     public final Modifier modifier;
     public final SlotType.SlotCount count;
+    public int neededPerLevel;
 
     public ModifierInfo(IDisplayModifierRecipe recipe){
         this.recipe = recipe;
         this.modifier = recipe.getDisplayResult().getModifier();
         this.count = recipe.getSlots();
+        if (recipe instanceof IncrementalModifierRecipe incrementalRecipe) {
+            try {
+                Field f = IncrementalModifierRecipe.class.getDeclaredField("neededPerLevel");
+                f.setAccessible(true);
+                this.neededPerLevel = f.getInt(incrementalRecipe);
+            } catch (Exception e) {
+                this.neededPerLevel = 0;
+            }
+        } else {
+            this.neededPerLevel = 0;
+        }
     }
 
     @Override

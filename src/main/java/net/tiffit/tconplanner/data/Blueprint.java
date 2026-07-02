@@ -1,29 +1,37 @@
 package net.tiffit.tconplanner.data;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tiffit.tconplanner.api.TCTool;
 import net.tiffit.tconplanner.util.DummyTinkersStationInventory;
 import net.tiffit.tconplanner.util.ModifierStack;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.definition.PartRequirement;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolPartsHook;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
-
-import java.util.*;
 
 public class Blueprint {
 
@@ -43,7 +51,8 @@ public class Blueprint {
         toolStack = tool.getRenderTool();
         toolItem = tool.getModifiable();
         toolDefinition = toolItem.getToolDefinition();
-        parts = toolDefinition.getData().getParts().stream().map(PartRequirement::getPart).filter(Objects::nonNull).toArray(IToolPart[]::new);
+//        parts = toolDefinition.getData().getParts().stream().map(PartRequirement::getPart).filter(Objects::nonNull).toArray(IToolPart[]::new);
+        parts = ToolPartsHook.parts(toolDefinition).toArray(IToolPart[]::new);
         materials = new IMaterial[parts.length];
     }
 
@@ -60,7 +69,7 @@ public class Blueprint {
             for (ModifierInfo info : modStack.getStack()) {
                 stack.addModifier(info.modifier.getId(), 1);
                 if (info.count != null) {
-                    stack.getPersistentData().addSlots(info.count.getType(), -info.count.getCount());
+                    stack.getPersistentData().addSlots(info.count.type(), -info.count.count());
                 }
             }
             modStack.applyIncrementals(stack);
@@ -100,31 +109,33 @@ public class Blueprint {
         return toNBT().equals(blueprint.toNBT());
     }
 
-    public ValidatedResult validate(){
+    public RecipeResult<ItemStack> validate(){
         ToolStack ts = ToolStack.from(createOutput(false));
-        ValidatedResult result = null;
+        RecipeResult<ItemStack> result = null;
+        RegistryAccess access = Minecraft.getInstance().level.registryAccess();
         for (ModifierInfo info : modStack.getStack()) {
             IDisplayModifierRecipe recipe = info.recipe;
-            ValidatedResult rs = ((ITinkerStationRecipe)recipe).getValidatedResult(new DummyTinkersStationInventory(ts.createStack()));
+            RecipeResult<LazyToolStack> rs = ((ITinkerStationRecipe)recipe).getValidatedResult(new DummyTinkersStationInventory(ts.createStack()), access);
             if(rs.hasError()){
-                result = rs;
+                result = RecipeResult.failure(rs.getMessage());
                 break;
             }else{
                 ts.addModifier(info.modifier.getId(), 1);
                 SlotType type = recipe.getSlotType();
                 SlotType.SlotCount count = recipe.getSlots();
                 if(type != null && count != null){
-                    ts.getPersistentData().addSlots(type, -count.getCount());
+                    ts.getPersistentData().addSlots(type, -count.count());
                 }
             }
         }
-        if(result == null)return ValidatedResult.PASS;
+        if(result == null) return RecipeResult.pass();
         return result;
     }
 
     public CompoundTag toNBT(){
         CompoundTag nbt = new CompoundTag();
-        nbt.putString("tool", Objects.requireNonNull(tool.getItem().getRegistryName()).toString());
+        nbt.putString("tool", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(tool.getItem())).toString());
+
         ListTag matList = new ListTag();
         for(int i = 0; i < materials.length; i++){
             matList.add(StringTag.valueOf(materials[i] == null ? "" : materials[i].getIdentifier().toString()));
@@ -149,7 +160,7 @@ public class Blueprint {
     public static Blueprint fromNBT(CompoundTag tag){
         ResourceLocation toolRL = new ResourceLocation(tag.getString("tool"));
         Optional<TCTool> optional = TCTool.getTools().stream()
-                .filter(tool -> Objects.equals(tool.getItem().getRegistryName(), toolRL)).findFirst();
+        		.filter(tool -> Objects.equals(ForgeRegistries.ITEMS.getKey(tool.getItem()), toolRL)).findFirst();
         if(!optional.isPresent())return null;
         Blueprint bp = new Blueprint(optional.get());
 

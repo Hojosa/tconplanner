@@ -1,6 +1,11 @@
 package net.tiffit.tconplanner.screen;
 
+import java.awt.Color;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.sounds.SoundEvents;
 import net.tiffit.tconplanner.data.Blueprint;
 import net.tiffit.tconplanner.screen.buttons.IconButton;
@@ -11,12 +16,9 @@ import net.tiffit.tconplanner.util.TranslationUtil;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatType;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
-
-import java.awt.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MaterialSelectPanel extends PlannerPanel{
     private static final int materialPageSize = 3*9;
@@ -46,7 +48,8 @@ public class MaterialSelectPanel extends PlannerPanel{
         addChild(leftPage);
         addChild(rightPage);
         //Add sorting buttons
-        Class<? extends IMaterialStats> statClass = MaterialRegistry.getClassForStat(part.getStatType());
+        MaterialStatType<?> statType = MaterialRegistry.getInstance().getStatType(part.getStatType());
+        Class<? extends IMaterialStats> statClass = statType != null ? statType.getDefaultStats().getClass() : null;
         if(statClass != null){
             List<MaterialSort<?>> sorts = MaterialSort.MAP.getOrDefault(statClass, Lists.newArrayList());
             int startX = width/2 - 6*sorts.size();

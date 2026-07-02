@@ -1,13 +1,21 @@
 package net.tiffit.tconplanner;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -39,14 +47,6 @@ import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
 import slimeknights.tconstruct.tables.client.inventory.widget.SlotButtonItem;
 import slimeknights.tconstruct.tables.client.inventory.widget.TinkerStationButtonsWidget;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class EventListener {
     private static final Icon plannerIcon = new Icon(0, 0);
@@ -56,7 +56,7 @@ public class EventListener {
 
     private static StationSlotLayout layout = null;
     private static boolean starredLayout = false;
-    private static final Field currentLayoutField;
+//    private static final Field currentLayoutField;
     private static SlotButtonItem starredButton = null;
     private static boolean forceNextUpdate = false;
     private static TinkerStationButtonsWidget buttonScreen;
@@ -64,9 +64,6 @@ public class EventListener {
 
     static {
         try {
-            currentLayoutField = TinkerStationScreen.class.getDeclaredField("currentLayout");
-            currentLayoutField.setAccessible(true);
-
             buttonsScreenField = TinkerStationScreen.class.getDeclaredField("buttonsScreen");
             buttonsScreenField.setAccessible(true);
         } catch (NoSuchFieldException e) {
@@ -75,7 +72,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public static void onScreenInit(ScreenEvent.InitScreenEvent.Post e) {
+    public static void onScreenInit(ScreenEvent.Init.Post e) {
         postRenderQueue.clear();
         if (e.getScreen() instanceof TinkerStationScreen screen) {
             Minecraft mc = screen.getMinecraft();
@@ -108,7 +105,7 @@ public class EventListener {
             }));
             if (data.starred != null) {
                 List<Component> tooltip = new ArrayList<>();
-                tooltip.add(new TextComponent("---------").withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.literal("---------").withStyle(ChatFormatting.GRAY));
                 tooltip.add(TranslationUtil.createComponent("star.move").withStyle(ChatFormatting.GOLD));
                 tooltip.add(TranslationUtil.createComponent("star.ext_remove").withStyle(ChatFormatting.RED));
                 e.addListener(new ExtItemStackButton(screen.cornerX + 83, screen.cornerY + 58, data.starred.createOutput(), tooltip, btn -> {
@@ -130,9 +127,9 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public static void onScreenDraw(ScreenEvent.DrawScreenEvent.Post e) {
+    public static void onScreenDraw(ScreenEvent.Render.Post e) {
         if (e.getScreen() instanceof TinkerStationScreen screen) {
-            PoseStack ms = e.getPoseStack();
+        	GuiGraphics guiGraphics = e.getGuiGraphics();
             if (starredLayout) {
                 Blueprint starred = TConPlanner.DATA.starred;
                 ItemStack carried = screen.getMenu().getCarried();
@@ -144,31 +141,31 @@ public class EventListener {
                     ItemStack stack = screen.getMenu().getSlot(i + 1).getItem();
                     MaterialId material = starred.materials[i].getIdentifier();
                     if (stack.isEmpty()) {
-                        ms.pushPose();
-                        ms.translate(0, 0, 101);
+                    	guiGraphics.pose().pushPose();
+                    	guiGraphics.pose().translate(0, 0, 101);
                         int color = carried.isEmpty() ? 0x5a000050 : isValidToolPart(carried, part, material) ? 0x5ae8b641 : 0x5aff0000;
-                        Screen.fill(ms, slotX, slotY, slotX + 16, slotY + 16, color);
-                        ms.popPose();
+                        guiGraphics.fill(slotX, slotY, slotX + 16, slotY + 16, color);
+                        guiGraphics.pose().popPose();
                         if (hovered) {
-                            screen.renderComponentTooltip(ms, Lists.newArrayList(TranslationUtil.createComponent("star.slot.missing").withStyle(ChatFormatting.DARK_RED), part.withMaterialForDisplay(material).getDisplayName()), e.getMouseX(), e.getMouseY());
+                        	guiGraphics.renderComponentTooltip(screen.getMinecraft().font, Lists.newArrayList(TranslationUtil.createComponent("star.slot.missing").withStyle(ChatFormatting.DARK_RED), part.withMaterialForDisplay(material).getDisplayName()), e.getMouseX(), e.getMouseY());
                         }
                     } else if (!material.equals(part.getMaterial(stack).getId())) {
-                        ms.pushPose();
-                        ms.translate(0, 0, 101);
-                        Screen.fill(ms, slotX, slotY, slotX + 16, slotY + 16, 0x7aff0000);
-                        ms.popPose();
+                    	guiGraphics.pose().pushPose();
+                    	guiGraphics.pose().translate(0, 0, 101);
+                    	guiGraphics.fill(slotX, slotY, slotX + 16, slotY + 16, 0x7aff0000);
+                        guiGraphics.pose().popPose();
                         if (hovered) {
-                            screen.renderComponentTooltip(ms, Lists.newArrayList(TranslationUtil.createComponent("star.slot.incorrect").withStyle(ChatFormatting.DARK_RED), part.withMaterialForDisplay(material).getDisplayName()), e.getMouseX(), e.getMouseY() - 30);
+                        	guiGraphics.renderComponentTooltip(screen.getMinecraft().font, Lists.newArrayList(TranslationUtil.createComponent("star.slot.incorrect").withStyle(ChatFormatting.DARK_RED), part.withMaterialForDisplay(material).getDisplayName()), e.getMouseX(), e.getMouseY() - 30);
                         }
                     }
                 }
             }
             if(starredButton != null){
-                ms.pushPose();
-                ms.translate(starredButton.x + 10, starredButton.y + 10, 105);
-                ms.scale(0.5f, 0.5f, 1);
-                BookmarkedButton.STAR_ICON.render(screen, ms, 0, 0);
-                ms.popPose();
+            	guiGraphics.pose().pushPose();
+            	guiGraphics.pose().translate(starredButton.getX() + 10, starredButton.getY() + 10, 105);
+            	guiGraphics.pose().scale(0.5f, 0.5f, 1);
+                BookmarkedButton.STAR_ICON.render(guiGraphics, 0, 0);
+                guiGraphics.pose().popPose();
             }
             while(postRenderQueue.size() > 0) {
                 postRenderQueue.poll().run();
@@ -177,7 +174,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public static void onScreenDraw(ScreenEvent.DrawScreenEvent.Pre e) {
+    public static void onScreenDraw(ScreenEvent.Render.Pre e) {
         if(e.getScreen() instanceof TinkerStationScreen){
             postRenderQueue.clear();
             updateLayout((TinkerStationScreen) e.getScreen(), forceNextUpdate);
@@ -186,7 +183,7 @@ public class EventListener {
 
     private static void updateLayout(TinkerStationScreen screen, boolean force) {
         try {
-            StationSlotLayout newLayout = (StationSlotLayout) currentLayoutField.get(screen);
+            StationSlotLayout newLayout = screen.getCurrentLayout();
             if(!force && newLayout == layout)return;
             forceNextUpdate = false;
             layout = newLayout;

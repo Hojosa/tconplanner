@@ -2,7 +2,10 @@ package net.tiffit.tconplanner.screen.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -17,13 +20,14 @@ public class IconButton extends Button {
 
     private final Icon icon;
     private final PlannerScreen parent;
-    private SoundEvent pressSound = SoundEvents.UI_BUTTON_CLICK;
+    private SoundEvent pressSound = SoundEvents.UI_BUTTON_CLICK.get();
     private Color color = Color.WHITE;
 
     public IconButton(int x, int y, Icon icon, Component tooltip, PlannerScreen parent, Button.OnPress action) {
-        super(x, y, 12, 12, tooltip, action);
+        super(x, y, 12, 12, tooltip, action,DEFAULT_NARRATION);
         this.icon = icon;
         this.parent = parent;
+        setTooltip(Tooltip.create(tooltip));
     }
 
     public IconButton withSound(SoundEvent sound){
@@ -37,21 +41,20 @@ public class IconButton extends Button {
     }
 
     @Override
-    public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_230431_4_) {
-        PlannerScreen.bindTexture();
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, isHovered ? 1 : 0.8F);
-        icon.render(parent, stack, x, y);
+        icon.render(guiGraphics, getX(), getY());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        if(isHovered){
-            renderToolTip(stack, mouseX, mouseY);
-        }
+//        if(isHovered){
+//            renderToolTip(stack, mouseX, mouseY);
+//        }
     }
 
-    @Override
-    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderTooltip(stack, this.getMessage(), mouseX, mouseY));
-    }
+//    @Override
+//    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
+//        parent.postRenderTasks.add(() -> parent.renderTooltip(stack, this.getMessage(), mouseX, mouseY));
+//    }
 
     @Override
     public void playDownSound(SoundManager handler) {

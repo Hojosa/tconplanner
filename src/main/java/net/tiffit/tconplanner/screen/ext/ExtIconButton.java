@@ -1,37 +1,34 @@
 package net.tiffit.tconplanner.screen.ext;
+import java.awt.Color;
+import java.util.function.Supplier;
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.tiffit.tconplanner.EventListener;
-import net.tiffit.tconplanner.screen.PlannerScreen;
 import net.tiffit.tconplanner.util.Icon;
-
-import java.awt.*;
-import java.util.function.Supplier;
 
 public class ExtIconButton extends Button {
 
     private static final Supplier<Boolean> ALWAYS_TRUE = () -> true;
 
     private final Icon icon;
-    private final Screen screen;
-    private SoundEvent pressSound = SoundEvents.UI_BUTTON_CLICK;
+    private SoundEvent pressSound = SoundEvents.UI_BUTTON_CLICK.get();
     private Color color = Color.WHITE;
 
     private Supplier<Boolean> enabledFunc = ALWAYS_TRUE;
 
     public ExtIconButton(int x, int y, Icon icon, Component tooltip, Button.OnPress action, Screen screen) {
-        super(x, y, 12, 12, new TextComponent(""), action,
-                (btn, stack, mx, my) -> screen.renderTooltip(stack, tooltip, mx, my));
+    	super(x, y, 12, 12, Component.literal(""), action, DEFAULT_NARRATION);
         this.icon = icon;
-        this.screen = screen;
+        setTooltip(Tooltip.create(tooltip));
     }
 
     public ExtIconButton withSound(SoundEvent sound){
@@ -56,16 +53,15 @@ public class ExtIconButton extends Button {
     }
 
     @Override
-    public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_230431_4_) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
         if(!enabledFunc.get())return;
-        PlannerScreen.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, isHovered ? 1 : 0.8F);
-        icon.render(screen, stack, x, y);
+        icon.render(guiGraphics, getX(), getY());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        if (this.isHoveredOrFocused()) {
-            EventListener.postRenderQueue.offer(() -> this.renderToolTip(stack, mouseX, mouseY));
-        }
+//        if (this.isHoveredOrFocused()) {
+//            EventListener.postRenderQueue.offer(() -> guiGraphics.renderToolTip(screen.getMinecraft().font, getTooltip(), mouseX, mouseY));
+//        }
     }
 
     @Override
