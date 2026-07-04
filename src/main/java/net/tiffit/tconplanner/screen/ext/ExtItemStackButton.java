@@ -18,7 +18,7 @@ import net.tiffit.tconplanner.EventListener;
 import net.tiffit.tconplanner.screen.buttons.BookmarkedButton;
 
 public class ExtItemStackButton extends Button {
-    public static ResourceLocation BACKGROUND = new ResourceLocation("tconstruct", "textures/gui/tinker_station.png");
+    public static ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("tconstruct", "textures/gui/tinker_station.png");
 
     private final ItemStack stack;
     private final Screen screen;

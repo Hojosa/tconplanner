@@ -15,7 +15,6 @@ import net.tiffit.tconplanner.screen.PlannerScreen;
 
 public class SliderWidget extends AbstractWidget {
 
-    private final PlannerScreen parent;
     private final Consumer<Integer> listener;
     private final int min, max;
     private double percent;
@@ -23,7 +22,6 @@ public class SliderWidget extends AbstractWidget {
 
     public SliderWidget(int x, int y, int width, int height, Consumer<Integer> listener, int min, int max, int value, PlannerScreen parent) {
         super(x, y, width, height, Component.literal(""));
-        this.parent = parent;
         this.listener = listener;
         this.min = min;
         this.max = max;

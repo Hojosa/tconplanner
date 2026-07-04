@@ -44,7 +44,7 @@ import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
 
 public class PlannerScreen extends Screen {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(TConPlanner.MODID, "textures/gui/planner.png");
+    public static ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(TConPlanner.MODID, "textures/gui/planner.png");
     private final HashMap<String, Object> cache = new HashMap<>();
     public Deque<Runnable> postRenderTasks = new ArrayDeque<>();
     private final TinkerStationScreen child;

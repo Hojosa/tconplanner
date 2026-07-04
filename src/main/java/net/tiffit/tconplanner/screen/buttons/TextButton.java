@@ -39,7 +39,7 @@ public class TextButton extends Button {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.drawCenteredString(Minecraft.getInstance().font, getMessage(), getX() + width/2, getY() + 5, isHovered ? 0xffffffff : 0xa0ffffff);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        if(isHovered){
+        if(isHovered && !tooltip.getString().isBlank()){
         	parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(Minecraft.getInstance().font, tooltip, mouseX, mouseY));
         }
     }

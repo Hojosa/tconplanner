@@ -9,11 +9,9 @@ import net.tiffit.tconplanner.screen.PlannerScreen;
 
 public class MatPageButton extends Button {
     private final boolean right;
-    private final PlannerScreen parent;
     public MatPageButton(int x, int y, int change, PlannerScreen parent) {
         super(x, y, 38, 20, Component.literal(""), button -> {parent.materialPage += change; parent.refresh();}, DEFAULT_NARRATION);
         right = change > 0;
-        this.parent = parent;
     }
 
     @Override
