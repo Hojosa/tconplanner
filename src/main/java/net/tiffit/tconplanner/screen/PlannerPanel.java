@@ -1,13 +1,13 @@
 package net.tiffit.tconplanner.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.TextComponent;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
 
 public class PlannerPanel extends AbstractWidget {
 
@@ -15,21 +15,21 @@ public class PlannerPanel extends AbstractWidget {
     protected final PlannerScreen parent;
 
     public PlannerPanel(int x, int y, int width, int height, PlannerScreen parent) {
-        super(x, y, width, height, new TextComponent(""));
+        super(x, y, width, height, Component.literal(""));
         this.parent = parent;
     }
 
     public void addChild(AbstractWidget widget){
-        widget.x += x;
-        widget.y += y;
+    	widget.setX(widget.getX() + getX());
+    	widget.setY(widget.getY() + getY());
         children.add(widget);
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float p_230430_4_) {
-        this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-        for (Widget child : children) {
-            child.render(stack, mouseX, mouseY, p_230430_4_);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230430_4_) {
+        this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
+        for (Renderable child : children) {
+            child.render(guiGraphics, mouseX, mouseY, p_230430_4_);
         }
     }
 
@@ -92,7 +92,6 @@ public class PlannerPanel extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput p_169152_) {
-
+    public void updateWidgetNarration(NarrationElementOutput p_169152_) {
     }
 }

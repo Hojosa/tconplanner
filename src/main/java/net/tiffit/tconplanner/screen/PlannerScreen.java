@@ -1,11 +1,24 @@
 package net.tiffit.tconplanner.screen;
 
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,7 +32,6 @@ import net.tiffit.tconplanner.data.PlannerData;
 import net.tiffit.tconplanner.util.MaterialSort;
 import net.tiffit.tconplanner.util.ModifierStack;
 import net.tiffit.tconplanner.util.TranslationUtil;
-import org.lwjgl.glfw.GLFW;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
@@ -30,13 +42,9 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class PlannerScreen extends Screen {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(TConPlanner.MODID, "textures/gui/planner.png");
+    public static ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(TConPlanner.MODID, "textures/gui/planner.png");
     private final HashMap<String, Object> cache = new HashMap<>();
     public Deque<Runnable> postRenderTasks = new ArrayDeque<>();
     private final TinkerStationScreen child;
@@ -98,7 +106,7 @@ public class PlannerScreen extends Screen {
         int toolSpace = 20;
         titleText = blueprint == null ? TranslationUtil.createComponent("notool") : blueprint.tool.getName();
         addRenderableWidget(new ToolSelectPanel(left - toolSpace * 5 - 4, top, toolSpace*5, toolSpace*3 + 23 + 4, tools, this));
-        if(data.saved.size() > 0) {
+        if(!data.saved.isEmpty()) {
             addRenderableWidget(new BookmarkSelectPanel(left - toolSpace * 5 - 4, top + 15 + 18*4, toolSpace * 5, toolSpace * 5 + 23 + 4, data, this));
         }
         //Everything in here should only be added if there is a tool selected
@@ -117,13 +125,13 @@ public class PlannerScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTick) {
-        renderBackground(stack);
-        bindTexture();
-        this.blit(stack, left, top, 0, 0, guiWidth, guiHeight);
-        drawCenteredString(stack, font, titleText, left + guiWidth / 2, top + 7, 0xffffffff);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics);
+        guiGraphics.blit(TEXTURE, left, top, 0, 0, guiWidth, guiHeight);
+        guiGraphics.drawCenteredString(font, titleText, left + guiWidth / 2, top + 7, 0xffffffff);
 
-        super.render(stack, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         Runnable task;
         while((task = postRenderTasks.poll()) != null)task.run();
     }
@@ -174,20 +182,9 @@ public class PlannerScreen extends Screen {
         return false;
     }
 
-    public void renderItemTooltip(PoseStack mstack, ItemStack stack, int x, int y) {
-        renderTooltip(mstack, stack, x, y);
-    }
-
-
     @Override
     public void onClose() {
         minecraft.setScreen(child);
-    }
-
-    public static void bindTexture(){
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TEXTURE);
     }
 
     public void bookmarkCurrent(){
@@ -247,7 +244,7 @@ public class PlannerScreen extends Screen {
             for (int i = 0; i < blueprint.parts.length; i++) {
                 IToolPart part = blueprint.parts[i];
                 List<IMaterial> usable = materials.stream().filter(part::canUseMaterial).collect(Collectors.toList());
-                if(usable.size() > 0)blueprint.materials[i] = usable.get(r.nextInt(usable.size()));
+                if(!usable.isEmpty())blueprint.materials[i] = usable.get(r.nextInt(usable.size()));
             }
             selectedModifier = null;
             refresh();
@@ -291,14 +288,14 @@ public class PlannerScreen extends Screen {
 
     public static List<IDisplayModifierRecipe> getModifierRecipes(){
         RecipeManager recipeManager = Minecraft.getInstance().level.getRecipeManager();
-        List<IDisplayModifierRecipe> jeiRecipes = RecipeHelper.getJEIRecipes(recipeManager, TinkerRecipeTypes.TINKER_STATION.get(), IDisplayModifierRecipe.class);
+        List<IDisplayModifierRecipe> jeiRecipes = RecipeHelper.getJEIRecipes(Minecraft.getInstance().level.registryAccess(), recipeManager, TinkerRecipeTypes.TINKER_STATION.get(), IDisplayModifierRecipe.class);
         List<IDisplayModifierRecipe> cleanedList = new ArrayList<>();
         for (IDisplayModifierRecipe recipe : jeiRecipes) {
             if(recipe instanceof ITinkerStationRecipe){
                 boolean contains = cleanedList.stream().anyMatch(recipe1 ->
                         recipe1.getDisplayResult().getModifier().equals(recipe.getDisplayResult().getModifier()) &&
                                 Objects.equals(recipe1.getSlots(), recipe.getSlots()) &&
-                                recipe1.getMaxLevel() == recipe.getMaxLevel());
+                                recipe1.getLevel() == recipe.getLevel());
                 if(!contains)cleanedList.add(recipe);
             }
         }

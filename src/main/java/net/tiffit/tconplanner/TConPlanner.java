@@ -34,6 +34,4 @@ public class TConPlanner {
         File folder = new File(gameDir, MODID);
         DATA = new PlannerData(folder);
     }
-
-
 }

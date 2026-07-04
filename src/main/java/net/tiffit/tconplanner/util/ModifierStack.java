@@ -1,6 +1,13 @@
 package net.tiffit.tconplanner.util;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -10,17 +17,9 @@ import net.tiffit.tconplanner.data.ModifierInfo;
 import net.tiffit.tconplanner.screen.PlannerScreen;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.impl.IncrementalModifier;
-import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ModifierStack {
     private final LinkedList<ModifierInfo> stack = new LinkedList<>();
@@ -39,8 +38,8 @@ public class ModifierStack {
         stack.add(index + 1, info);
     }
 
-    public void setIncrementalDiff(Modifier modifier, int amount){
-        incrementalDiffMap.put(modifier.getId(), Mth.clamp(amount,0, ModifierRecipeLookup.getNeededPerLevel(modifier.getId())));
+    public void setIncrementalDiff(Modifier modifier, int amount, int needed_per_level){
+        incrementalDiffMap.put(modifier.getId(), Mth.clamp(amount,0, needed_per_level));
     }
 
     public int getIncrementalDiff(Modifier modifier){
@@ -56,11 +55,14 @@ public class ModifierStack {
     }
 
     public void applyIncrementals(ToolStack tool){
-        stack.stream().distinct().forEach(info -> {
-            Modifier mod = info.modifier;
-            int amount = ModifierRecipeLookup.getNeededPerLevel(mod.getId());
-            if(amount > 0){
-                IncrementalModifier.setAmount(tool.getPersistentData(), mod.getId(), amount - getIncrementalDiff(mod));
+    	stack.stream().distinct().forEach(info -> {
+            int neededPerLevel = info.neededPerLevel;
+            if(neededPerLevel > 0){
+                int diff = getIncrementalDiff(info.modifier);
+                if(diff > 0){
+                    tool.removeModifier(info.modifier.getId(), 1);
+                    tool.addModifierAmount(info.modifier.getId(), neededPerLevel - diff, neededPerLevel);
+                }
             }
         });
     }

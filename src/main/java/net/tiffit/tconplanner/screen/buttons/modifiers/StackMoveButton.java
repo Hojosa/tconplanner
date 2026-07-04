@@ -1,10 +1,11 @@
 package net.tiffit.tconplanner.screen.buttons.modifiers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.tiffit.tconplanner.screen.PlannerScreen;
 import net.tiffit.tconplanner.screen.buttons.PaginatedPanel;
 import net.tiffit.tconplanner.util.TranslationUtil;
@@ -17,27 +18,20 @@ public class StackMoveButton extends Button {
     private final boolean moveUp;
 
     public StackMoveButton(int x, int y, boolean moveUp, PaginatedPanel<ModifierStackButton> scrollPanel, PlannerScreen parent) {
-        super(x, y, 18, 10, new TextComponent(""), e -> {});
+        super(x, y, 18, 10, Component.literal(""), e -> {}, DEFAULT_NARRATION);
         this.parent = parent;
         this.moveUp = moveUp;
         this.scrollPanel = scrollPanel;
+        setTooltip(Tooltip.create(moveUp ? MOVE_UP : MOVE_DOWN));
     }
 
     @Override
-    public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_230431_4_) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
         RenderSystem.enableBlend();
-        PlannerScreen.bindTexture();
-        parent.blit(stack, x, y, 214, 145 + (moveUp ? 0 : height), width, height);
-        if(isHovered){
-            renderToolTip(stack, mouseX, mouseY);
-        }
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 214, 145 + (moveUp ? 0 : height), width, height);
     }
-
-    @Override
-    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderTooltip(stack, moveUp ? MOVE_UP : MOVE_DOWN, mouseX, mouseY));
-    }
-
+    
     @Override
     public void onPress() {
         if(moveUp){

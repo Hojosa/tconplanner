@@ -1,16 +1,16 @@
 package net.tiffit.tconplanner.screen.buttons;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.Collections;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.tiffit.tconplanner.screen.PlannerScreen;
 import net.tiffit.tconplanner.util.TextPosEnum;
-
-import java.util.Collections;
-import java.util.List;
 
 public class TooltipTextWidget extends AbstractWidget {
 
@@ -20,6 +20,7 @@ public class TooltipTextWidget extends AbstractWidget {
     private final List<Component> tooltip;
 
     private IOnTooltipTextWidgetClick onClick;
+//	private int x;
 
     public TooltipTextWidget(int x, int y, Component text, Component tooltip, PlannerScreen parent) {
         this(x, y, TextPosEnum.LEFT, text, tooltip, parent);
@@ -37,7 +38,7 @@ public class TooltipTextWidget extends AbstractWidget {
         setWidth(font.width(text));
         setHeight(font.lineHeight);
         if(pos == TextPosEnum.CENTER){
-            this.x -= getWidth()/2;
+            setX(getX() - getWidth()/2);
         }
     }
 
@@ -52,16 +53,16 @@ public class TooltipTextWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_230431_4_) {
-        drawString(stack, font, getMessage(), x, y, color);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
+    	guiGraphics.drawString(font, getMessage(), getX(), getY(), color);
         if(isHoveredOrFocused()){
-            renderToolTip(stack, mouseX, mouseY);
+            renderToolTip(guiGraphics, mouseX, mouseY);
         }
     }
 
-    @Override
-    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderComponentTooltip(stack, tooltip, mouseX, mouseY));
+//    @Override
+    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        parent.postRenderTasks.add(() -> guiGraphics.renderComponentTooltip(parent.getMinecraft().font, tooltip, mouseX, mouseY));
     }
 
     @Override
@@ -74,7 +75,7 @@ public class TooltipTextWidget extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput p_169152_) {}
+    public void updateWidgetNarration(NarrationElementOutput p_169152_) {}
 
     public static interface IOnTooltipTextWidgetClick {
         boolean onClick(double mouseX, double mouseY, int mouseButton);

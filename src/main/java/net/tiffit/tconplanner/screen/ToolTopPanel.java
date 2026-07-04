@@ -1,8 +1,11 @@
 package net.tiffit.tconplanner.screen;
 
+import java.util.List;
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.tiffit.tconplanner.api.TCSlotPos;
@@ -15,8 +18,6 @@ import net.tiffit.tconplanner.util.Icon;
 import net.tiffit.tconplanner.util.TranslationUtil;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
-
-import java.util.List;
 
 public class ToolTopPanel extends PlannerPanel{
 
@@ -57,22 +58,20 @@ public class ToolTopPanel extends PlannerPanel{
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float p_230430_4_) {
-        PoseStack itemModelStack = RenderSystem.getModelViewStack();
-        itemModelStack.pushPose();
-        itemModelStack.translate(x + TCSlotPos.partsOffsetX + 7, y + TCSlotPos.partsOffsetY + 22, -200);
-        itemModelStack.scale(3.7F, 3.7F, 1.0F);
-        Minecraft.getInstance().getItemRenderer().renderGuiItem(parent.blueprint.toolStack, 0, 0);
-        itemModelStack.popPose();
-        PlannerScreen.bindTexture();
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230430_4_) {
+    	guiGraphics.pose().pushPose();
+    	guiGraphics.pose().translate(getX() + TCSlotPos.partsOffsetX + 7, getY() + TCSlotPos.partsOffsetY + 22, -200);
+    	guiGraphics.pose().scale(.7F, 3.7F, 1.0F);
+    	guiGraphics.renderItem(parent.blueprint.toolStack, 0, 0);
+    	guiGraphics.pose().popPose();
+
         int boxX = 13, boxY = 24, boxL = 81;
-        if(mouseX > boxX + x && mouseY > boxY + y && mouseX < boxX + x + boxL && mouseY < boxY + y + boxL)
+        if(mouseX > boxX + getX() && mouseY > boxY + getY() && mouseX < boxX + getX() + boxL && mouseY < boxY + getY() + boxL)
             RenderSystem.setShaderColor(1f, 1f, 1f, 0.75f);
         else RenderSystem.setShaderColor(1f, 1f, 1f, 0.5f);
-        RenderSystem.applyModelViewMatrix();
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
-        this.blit(stack, x + boxX, y + boxY, boxX, boxY, boxL, boxL);
-        super.render(stack, mouseX, mouseY, p_230430_4_);
+        guiGraphics.blit(PlannerScreen.TEXTURE, getX() + boxX, getY() + boxY, boxX, boxY, boxL, boxL);
+        super.renderWidget(guiGraphics, mouseX, mouseY, p_230430_4_);
     }
 }

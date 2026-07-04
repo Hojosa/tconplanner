@@ -1,15 +1,23 @@
 package net.tiffit.tconplanner.screen.buttons.modifiers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.tiffit.tconplanner.data.ModifierInfo;
@@ -22,15 +30,12 @@ import slimeknights.tconstruct.library.client.modifiers.ModifierIconManager;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.impl.DurabilityShieldModifier;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ModifierSelectButton extends Button {
 
@@ -38,21 +43,19 @@ public class ModifierSelectButton extends Button {
 
     private final IDisplayModifierRecipe recipe;
     private final Modifier modifier;
-    private final boolean selected;
     private final Component error;
     private final Component displayName;
     public final ModifierStateEnum state;
     private final PlannerScreen parent;
     private final List<ItemStack> recipeStacks = new ArrayList<>();
 
-    private final TextComponent levelText;
+    private final MutableComponent levelText;
 
     public ModifierSelectButton(IDisplayModifierRecipe recipe, ModifierStateEnum state, @Nullable Component error, int level, ToolStack tool, PlannerScreen parent) {
-        super(0, 0, 100, 18, new TextComponent(""), e -> {});
+        super(0, 0, 100, 18, Component.literal(""), e -> {}, DEFAULT_NARRATION);
         this.recipe = recipe;
         this.modifier = recipe.getDisplayResult().getModifier();
         this.parent = parent;
-        this.selected = false;
         this.state = state;
         this.error = error;
         for (int i = 0; i < recipe.getInputCount(); i++) {
@@ -60,16 +63,15 @@ public class ModifierSelectButton extends Button {
         }
         displayName = level == 0 ? modifier.getDisplayName() : modifier.getDisplayName(level);
         boolean singleUse = modifier instanceof NoLevelsModifier || modifier instanceof DurabilityShieldModifier;
-        int maxLevel = singleUse ? 1 : recipe.getMaxLevel();
+        int maxLevel = singleUse ? 1 : recipe.getLevel().max();
         int currentLevel = singleUse ? tool.getModifierLevel(modifier) : parent.blueprint.modStack.getLevel(modifier);
         if(currentLevel > maxLevel && maxLevel > 0)currentLevel = maxLevel;
-        levelText = new TextComponent(currentLevel + "/" +(maxLevel > 0 ? maxLevel : "\u221E"));
+        levelText = Component.literal(currentLevel + "/" +(maxLevel > 0 ? maxLevel : "\u221E"));
         if(error != null)levelText.withStyle(ChatFormatting.DARK_RED);
     }
 
     @Override
-    public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_230431_4_) {
-        PlannerScreen.bindTexture();
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
         RenderSystem.enableBlend();
         switch (state){
             case APPLIED:
@@ -79,52 +81,51 @@ public class ModifierSelectButton extends Button {
             default:
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
-        parent.blit(stack, x, y, 0, 224, 100, 18);
+        guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 0, 224, 100, 18);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         if(isHoveredOrFocused()){
-            Minecraft.getInstance().getItemRenderer().renderGuiItem(recipeStacks.get((int)((System.currentTimeMillis() / 1000) % recipeStacks.size())), x + 1, y + 1);
+        	guiGraphics.renderItem(recipeStacks.get((int)((System.currentTimeMillis() / 1000) % recipeStacks.size())), getX() + 1, getY() + 1);
         }else{
-            ModifierIconManager.renderIcon(stack, modifier, x+1, y+1, 0, 16);
+        	ModifierIconManager.renderIcon(guiGraphics, modifier, getX()+1, getY()+1, 0, 16);
         }
         Font font = Minecraft.getInstance().font;
-
-        stack.pushPose();
-        stack.translate(x + 20, y + 2, 0);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(getX() + 20, getY() + 2, 0);
         float nameWidth = font.width(displayName);
         int maxWidth = width - 22;
         if(nameWidth > maxWidth){
             float scale = maxWidth/nameWidth;
-            stack.scale(scale, scale, 1);
+            guiGraphics.pose().scale(scale, scale, 1);
         }
-        Screen.drawString(stack, font, displayName, 0, 0, 0xff_ff_ff_ff);
-        stack.popPose();
+        guiGraphics.drawString(font, displayName, 0, 0, 0xff_ff_ff_ff);
+        guiGraphics.pose().popPose();
 
-        stack.pushPose();
-        stack.translate(x + 20, y + 11, 0);
-        stack.scale(0.5f, 0.5f, 1);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(getX() + 20, getY() + 11, 0);
+        guiGraphics.pose().scale(0.5f, 0.5f, 1);
         if(recipe.getSlots() != null) {
             SlotType.SlotCount count = recipe.getSlots();
-            MutableComponent text = count.getCount() == 1 ? TranslationUtil.createComponent("modifiers.usedslot", count.getType().getDisplayName()) :
-                    TranslationUtil.createComponent("modifiers.usedslots", count.getCount(), count.getType().getDisplayName());
-            Screen.drawString(stack, font, text, 0, 0, 0xff_ff_ff_ff);
+            MutableComponent text = count.count() == 1 ? TranslationUtil.createComponent("modifiers.usedslot", count.type().getDisplayName()) :
+                    TranslationUtil.createComponent("modifiers.usedslots", count.count(), count.type().getDisplayName());
+            guiGraphics.drawString(font, text, 0, 0, 0xff_ff_ff_ff);
         }
-        stack.popPose();
+        guiGraphics.pose().popPose();
 
-        stack.pushPose();
-        stack.translate(x + width - 1, y + 11, 0);
-        stack.scale(0.5f, 0.5f, 1);
-        Screen.drawString(stack, font, levelText, -font.width(levelText), 0, 0xff_ff_ff_ff);
-        stack.popPose();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(getX() + width - 1, getY() + 11, 0);
+        guiGraphics.pose().scale(0.5f, 0.5f, 1);
+        guiGraphics.drawString(font, levelText, -font.width(levelText), 0, 0xff_ff_ff_ff);
+        guiGraphics.pose().popPose();
         if(isHovered){
-            renderToolTip(stack, mouseX, mouseY);
+            renderToolTip(guiGraphics, mouseX, mouseY);
         }
     }
 
-    @Override
-    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
+    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         parent.postRenderTasks.add(() -> {
             List<Component> tooltips = new ArrayList<>(modifier.getDescriptionList());
             if(error != null)tooltips.add(error.copy().withStyle(ERROR_STYLE));
-            parent.renderComponentTooltip(stack, tooltips, mouseX, mouseY);
+            guiGraphics.renderComponentTooltip(parent.getMinecraft().font, tooltips, mouseX, mouseY);
         });
     }
 
@@ -162,19 +163,15 @@ public class ModifierSelectButton extends Button {
         int currentLevel = tstack.getModifierLevel(modifier);
         if (currentLevel != 0)
             mstate = ModifierStateEnum.APPLIED;
-        ValidatedResult validatedResult = tsrecipe.getValidatedResult(new DummyTinkersStationInventory(stack));
+        RecipeResult<LazyToolStack> validatedResult = tsrecipe.getValidatedResult(new DummyTinkersStationInventory(stack), screen.getMinecraft().level.registryAccess());
         if(!validatedResult.isSuccess())error = validatedResult.getMessage();
         else {
             if(currentLevel >= 1 && (modifier instanceof NoLevelsModifier || modifier instanceof DurabilityShieldModifier)){
-                error = ValidatedResult.failure(ModifierPanel.KEY_MAX_LEVEL, modifier.getDisplayName(), 1).getMessage();
+                error = RecipeResult.failure(ModifierPanel.KEY_MAX_LEVEL, modifier.getDisplayName(), 1).getMessage();
             }else{
                 if(mstate != ModifierStateEnum.APPLIED)mstate = ModifierStateEnum.AVAILABLE;
             }
         }
-        if(validatedResult.isSuccess()){
-            if(mstate != ModifierStateEnum.APPLIED)mstate = ModifierStateEnum.AVAILABLE;
-        }
-        else error = validatedResult.getMessage();
         return new ModifierSelectButton(recipe, mstate, error, currentLevel, tstack, screen);
     }
 }
