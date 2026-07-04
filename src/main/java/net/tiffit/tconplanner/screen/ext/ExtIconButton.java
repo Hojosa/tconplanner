@@ -55,10 +55,13 @@ public class ExtIconButton extends Button {
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
         if(!enabledFunc.get())return;
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 200);
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, isHovered ? 1 : 0.8F);
         icon.render(guiGraphics, getX(), getY());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        guiGraphics.pose().popPose();
     }
 
     @Override
