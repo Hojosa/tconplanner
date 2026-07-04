@@ -64,18 +64,11 @@ public class ToolTopPanel extends PlannerPanel{
     	guiGraphics.pose().scale(.7F, 3.7F, 1.0F);
     	guiGraphics.renderItem(parent.blueprint.toolStack, 0, 0);
     	guiGraphics.pose().popPose();
-//        PoseStack itemModelStack = RenderSystem.getModelViewStack();
-//        itemModelStack.pushPose();
-//        itemModelStack.translate(x + TCSlotPos.partsOffsetX + 7, y + TCSlotPos.partsOffsetY + 22, -200);
-//        itemModelStack.scale(3.7F, 3.7F, 1.0F);
-//        Minecraft.getInstance().getItemRenderer().renderGuiItem(parent.blueprint.toolStack, 0, 0);
-//        itemModelStack.popPose();
-//        PlannerScreen.bindTexture();
+
         int boxX = 13, boxY = 24, boxL = 81;
         if(mouseX > boxX + getX() && mouseY > boxY + getY() && mouseX < boxX + getX() + boxL && mouseY < boxY + getY() + boxL)
             RenderSystem.setShaderColor(1f, 1f, 1f, 0.75f);
         else RenderSystem.setShaderColor(1f, 1f, 1f, 0.5f);
-//        RenderSystem.applyModelViewMatrix();
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
         guiGraphics.blit(PlannerScreen.TEXTURE, getX() + boxX, getY() + boxY, boxX, boxY, boxL, boxL);

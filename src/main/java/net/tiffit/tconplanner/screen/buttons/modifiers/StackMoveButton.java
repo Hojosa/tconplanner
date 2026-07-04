@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.tiffit.tconplanner.screen.PlannerScreen;
 import net.tiffit.tconplanner.screen.buttons.PaginatedPanel;
@@ -21,6 +22,7 @@ public class StackMoveButton extends Button {
         this.parent = parent;
         this.moveUp = moveUp;
         this.scrollPanel = scrollPanel;
+        setTooltip(Tooltip.create(moveUp ? MOVE_UP : MOVE_DOWN));
     }
 
     @Override
@@ -28,16 +30,8 @@ public class StackMoveButton extends Button {
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 214, 145 + (moveUp ? 0 : height), width, height);
-        if(isHovered){
-            renderToolTip(guiGraphics, mouseX, mouseY);
-        }
     }
-
-//    @Override
-    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(parent.getMinecraft().font, moveUp ? MOVE_UP : MOVE_DOWN, mouseX, mouseY));
-    }
-
+    
     @Override
     public void onPress() {
         if(moveUp){

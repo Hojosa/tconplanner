@@ -23,7 +23,6 @@ public class ModifierStackButton extends Button {
 
     private final Modifier modifier;
     private final IDisplayModifierRecipe recipe;
-    private final ModifierInfo modifierInfo;
     private final PlannerScreen parent;
     private final Component displayName;
     private final ItemStack display;
@@ -31,7 +30,6 @@ public class ModifierStackButton extends Button {
 
     public ModifierStackButton(ModifierInfo modifierInfo, int index, int level, ItemStack display, PlannerScreen parent) {
         super(0, 0, 100, 18, Component.literal(""), e -> {}, DEFAULT_NARRATION);
-        this.modifierInfo = modifierInfo;
         this.parent = parent;
         this.modifier = modifierInfo.modifier;
         this.recipe = modifierInfo.recipe;
@@ -42,7 +40,6 @@ public class ModifierStackButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
-//        PlannerScreen.bindTexture();
         RenderSystem.enableBlend();
         if(parent.selectedModifierStackIndex == index){
             RenderSystem.setShaderColor(255/255f, 200/255f, 0f, 1f);
@@ -77,7 +74,6 @@ public class ModifierStackButton extends Button {
         }
     }
 
-//    @Override
     public void renderToolTip(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY) {
         parent.postRenderTasks.add(() -> {
             List<Component> tooltips = new ArrayList<>(modifier.getDescriptionList());

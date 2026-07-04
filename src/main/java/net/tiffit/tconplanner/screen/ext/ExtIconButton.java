@@ -59,9 +59,6 @@ public class ExtIconButton extends Button {
         RenderSystem.setShaderColor(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, isHovered ? 1 : 0.8F);
         icon.render(guiGraphics, getX(), getY());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-//        if (this.isHoveredOrFocused()) {
-//            EventListener.postRenderQueue.offer(() -> guiGraphics.renderToolTip(screen.getMinecraft().font, getTooltip(), mouseX, mouseY));
-//        }
     }
 
     @Override
@@ -69,4 +66,3 @@ public class ExtIconButton extends Button {
         if(pressSound != null)handler.play(SimpleSoundInstance.forUI(pressSound, 1.0F));
     }
 }
-

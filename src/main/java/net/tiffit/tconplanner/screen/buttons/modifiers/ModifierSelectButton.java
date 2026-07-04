@@ -43,7 +43,6 @@ public class ModifierSelectButton extends Button {
 
     private final IDisplayModifierRecipe recipe;
     private final Modifier modifier;
-    private final boolean selected;
     private final Component error;
     private final Component displayName;
     public final ModifierStateEnum state;
@@ -57,7 +56,6 @@ public class ModifierSelectButton extends Button {
         this.recipe = recipe;
         this.modifier = recipe.getDisplayResult().getModifier();
         this.parent = parent;
-        this.selected = false;
         this.state = state;
         this.error = error;
         for (int i = 0; i < recipe.getInputCount(); i++) {
@@ -84,13 +82,13 @@ public class ModifierSelectButton extends Button {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
         guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 0, 224, 100, 18);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         if(isHoveredOrFocused()){
         	guiGraphics.renderItem(recipeStacks.get((int)((System.currentTimeMillis() / 1000) % recipeStacks.size())), getX() + 1, getY() + 1);
         }else{
         	ModifierIconManager.renderIcon(guiGraphics, modifier, getX()+1, getY()+1, 0, 16);
         }
         Font font = Minecraft.getInstance().font;
-
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(getX() + 20, getY() + 2, 0);
         float nameWidth = font.width(displayName);
@@ -123,7 +121,6 @@ public class ModifierSelectButton extends Button {
         }
     }
 
-//    @Override
     public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         parent.postRenderTasks.add(() -> {
             List<Component> tooltips = new ArrayList<>(modifier.getDescriptionList());
@@ -175,10 +172,6 @@ public class ModifierSelectButton extends Button {
                 if(mstate != ModifierStateEnum.APPLIED)mstate = ModifierStateEnum.AVAILABLE;
             }
         }
-        if(validatedResult.isSuccess()){
-            if(mstate != ModifierStateEnum.APPLIED)mstate = ModifierStateEnum.AVAILABLE;
-        }
-        else error = validatedResult.getMessage();
         return new ModifierSelectButton(recipe, mstate, error, currentLevel, tstack, screen);
     }
 }

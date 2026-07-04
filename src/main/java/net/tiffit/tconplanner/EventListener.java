@@ -56,7 +56,6 @@ public class EventListener {
 
     private static StationSlotLayout layout = null;
     private static boolean starredLayout = false;
-//    private static final Field currentLayoutField;
     private static SlotButtonItem starredButton = null;
     private static boolean forceNextUpdate = false;
     private static TinkerStationButtonsWidget buttonScreen;
@@ -167,7 +166,7 @@ public class EventListener {
                 BookmarkedButton.STAR_ICON.render(guiGraphics, 0, 0);
                 guiGraphics.pose().popPose();
             }
-            while(postRenderQueue.size() > 0) {
+            while(!postRenderQueue.isEmpty()) {
                 postRenderQueue.poll().run();
             }
         }

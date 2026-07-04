@@ -1,7 +1,8 @@
 package net.tiffit.tconplanner.screen.buttons;
 
+import java.awt.Color;
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -14,19 +15,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.tiffit.tconplanner.screen.PlannerScreen;
 import net.tiffit.tconplanner.util.Icon;
 
-import java.awt.*;
-
 public class IconButton extends Button {
 
     private final Icon icon;
-    private final PlannerScreen parent;
     private SoundEvent pressSound = SoundEvents.UI_BUTTON_CLICK.get();
     private Color color = Color.WHITE;
 
     public IconButton(int x, int y, Icon icon, Component tooltip, PlannerScreen parent, Button.OnPress action) {
         super(x, y, 12, 12, tooltip, action,DEFAULT_NARRATION);
         this.icon = icon;
-        this.parent = parent;
         setTooltip(Tooltip.create(tooltip));
     }
 
@@ -46,15 +43,7 @@ public class IconButton extends Button {
         RenderSystem.setShaderColor(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, isHovered ? 1 : 0.8F);
         icon.render(guiGraphics, getX(), getY());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-//        if(isHovered){
-//            renderToolTip(stack, mouseX, mouseY);
-//        }
     }
-
-//    @Override
-//    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
-//        parent.postRenderTasks.add(() -> parent.renderTooltip(stack, this.getMessage(), mouseX, mouseY));
-//    }
 
     @Override
     public void playDownSound(SoundManager handler) {

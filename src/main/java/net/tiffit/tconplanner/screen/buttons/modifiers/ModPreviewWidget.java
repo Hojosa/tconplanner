@@ -1,5 +1,6 @@
 package net.tiffit.tconplanner.screen.buttons.modifiers;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -25,13 +26,8 @@ public class ModPreviewWidget extends AbstractWidget {
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
     	guiGraphics.renderItem(this.stack, getX(), getY());
         if(isHovered && !disabled){
-            renderToolTip(guiGraphics, mouseX, mouseY);
+        	parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(Minecraft.getInstance().font, stack, mouseX, mouseY));
         }
-    }
-
-//    @Override
-    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderItemTooltip(guiGraphics, this.stack, mouseX, mouseY));
     }
 
     @Override

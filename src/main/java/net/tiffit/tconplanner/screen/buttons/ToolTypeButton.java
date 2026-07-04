@@ -1,7 +1,7 @@
 package net.tiffit.tconplanner.screen.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -30,12 +30,7 @@ public class ToolTypeButton extends Button {
         guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 213, 41 + (selected ? 18 : 0), 18, 18);
         guiGraphics.renderItem(tool.getRenderTool(), getX() + 1, getY() + 1);
         if(isHovered){
-            renderToolTip(guiGraphics, mouseX, mouseY);
+        	parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(Minecraft.getInstance().font, tool.getRenderTool(), mouseX, mouseY));
         }
-    }
-
-//    @Override
-    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderItemTooltip(guiGraphics, tool.getRenderTool(), mouseX, mouseY));
     }
 }

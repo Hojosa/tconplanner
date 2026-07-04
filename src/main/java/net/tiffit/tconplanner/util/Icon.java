@@ -1,9 +1,6 @@
 package net.tiffit.tconplanner.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.tiffit.tconplanner.TConPlanner;
 
@@ -18,8 +15,6 @@ public class Icon {
     }
 
     public void render(GuiGraphics guiGraphics, int x, int y){
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, ICONS);
         guiGraphics.blit(ICONS, x, y, this.x*12, this.y*12, 12, 12);
     }
 }

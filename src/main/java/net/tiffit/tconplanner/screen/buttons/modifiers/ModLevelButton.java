@@ -1,5 +1,7 @@
 package net.tiffit.tconplanner.screen.buttons.modifiers;
 
+import java.util.List;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.ChatFormatting;
@@ -36,10 +38,10 @@ public class ModLevelButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float p_230431_4_) {
-//        PlannerScreen.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1f, 1f, 1f, disabled ? 0.5f : 1f);
         guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), change > 0 ? 176 : 194, disabled  ? 146 : 163, width, height);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         if(isHoveredOrFocused()){
             renderToolTip(guiGraphics, mouseX, mouseY);
         }
@@ -61,7 +63,7 @@ public class ModLevelButton extends Button {
         if(disabled) {
             parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(parent.getMinecraft().font ,tooltip, mouseX, mouseY));
         }else{
-            parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(parent.getMinecraft().font, TranslationUtil.createComponent(change < 0 ? "modifiers.removelevel" : "modifiers.addlevel").setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN)), mouseX, mouseY));
+            parent.postRenderTasks.add(() -> guiGraphics.renderComponentTooltip(parent.getMinecraft().font, List.of(TranslationUtil.createComponent(change < 0 ? "modifiers.removelevel" : "modifiers.addlevel").setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN))), mouseX, mouseY));
         }
     }
 

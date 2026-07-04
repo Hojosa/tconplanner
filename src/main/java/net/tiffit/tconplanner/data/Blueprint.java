@@ -51,7 +51,6 @@ public class Blueprint {
         toolStack = tool.getRenderTool();
         toolItem = tool.getModifiable();
         toolDefinition = toolItem.getToolDefinition();
-//        parts = toolDefinition.getData().getParts().stream().map(PartRequirement::getPart).filter(Objects::nonNull).toArray(IToolPart[]::new);
         parts = ToolPartsHook.parts(toolDefinition).toArray(IToolPart[]::new);
         materials = new IMaterial[parts.length];
     }
@@ -143,14 +142,14 @@ public class Blueprint {
         nbt.put("materials", matList);
         nbt.put("modifiers", modStack.toNBT());
 
-        if(creativeSlots.size() > 0){
+        if(!creativeSlots.isEmpty()){
             CompoundTag creativeSlotsNbt = new CompoundTag();
             creativeSlots.forEach((slotType, integer) -> {
                 if(integer > 0) {
                     creativeSlotsNbt.putInt(slotType.getName(), integer);
                 }
             });
-            if(creativeSlotsNbt.size() > 0){
+            if(!creativeSlotsNbt.isEmpty()){
                 nbt.put("creativeSlots", creativeSlotsNbt);
             }
         }
@@ -188,5 +187,4 @@ public class Blueprint {
         }
         return bp;
     }
-
 }

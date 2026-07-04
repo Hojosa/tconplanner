@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.tiffit.tconplanner.data.Blueprint;
@@ -18,15 +17,11 @@ public class BookmarkedButton extends Button {
 
     private final PlannerScreen parent;
     private final ItemStack stack;
-    private final int index;
-    private final Blueprint blueprint;
     private final boolean starred;
     private boolean selected;
 
     public BookmarkedButton(int index, Blueprint blueprint, boolean starred, PlannerScreen parent){
         super(0, 0, 18, 18, Component.literal(""), button -> parent.setBlueprint(blueprint.clone()), DEFAULT_NARRATION);
-        this.index = index;
-        this.blueprint = blueprint;
         this.starred = starred;
         this.parent = parent;
         stack = blueprint.createOutput();
@@ -38,7 +33,6 @@ public class BookmarkedButton extends Button {
     	RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         guiGraphics.blit(PlannerScreen.TEXTURE, getX(), getY(), 213, 41 + (selected ? 18 : 0), 18, 18);
-        ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
         guiGraphics.renderItem(this.stack, getX() + 1, getY() + 1);
         if(starred){
         	guiGraphics.pose().pushPose();
@@ -48,12 +42,7 @@ public class BookmarkedButton extends Button {
             guiGraphics.pose().popPose();
         }
         if(isHovered){
-        	guiGraphics.renderTooltip(Minecraft.getInstance().font, this.stack, mouseX, mouseY);
+        	parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(Minecraft.getInstance().font, this.stack, mouseX, mouseY));
         }
     }
-    //use guiGraphics.renderTooltip() instead
-//    @Override
-//    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-//    	parent.postRenderTasks.add(() -> parent.renderItemTooltip(stack, this.stack, mouseX, mouseY));
-//    }
 }

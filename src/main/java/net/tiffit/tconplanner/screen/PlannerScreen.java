@@ -106,7 +106,7 @@ public class PlannerScreen extends Screen {
         int toolSpace = 20;
         titleText = blueprint == null ? TranslationUtil.createComponent("notool") : blueprint.tool.getName();
         addRenderableWidget(new ToolSelectPanel(left - toolSpace * 5 - 4, top, toolSpace*5, toolSpace*3 + 23 + 4, tools, this));
-        if(data.saved.size() > 0) {
+        if(!data.saved.isEmpty()) {
             addRenderableWidget(new BookmarkSelectPanel(left - toolSpace * 5 - 4, top + 15 + 18*4, toolSpace * 5, toolSpace * 5 + 23 + 4, data, this));
         }
         //Everything in here should only be added if there is a tool selected
@@ -127,12 +127,11 @@ public class PlannerScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(guiGraphics);
-//        bindTexture();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.blit(TEXTURE, left, top, 0, 0, guiWidth, guiHeight);
         guiGraphics.drawCenteredString(font, titleText, left + guiWidth / 2, top + 7, 0xffffffff);
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         Runnable task;
         while((task = postRenderTasks.poll()) != null)task.run();
     }
@@ -182,23 +181,11 @@ public class PlannerScreen extends Screen {
         }
         return false;
     }
-    @Deprecated
-    public void renderItemTooltip(GuiGraphics guiGraphics, ItemStack stack, int x, int y) {
-    	guiGraphics.renderTooltip(Minecraft.getInstance().font, stack, x, y);
-    }
-
 
     @Override
     public void onClose() {
         minecraft.setScreen(child);
     }
-
-//    public static void bindTexture(){
-//        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-//        
-////        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-////        RenderSystem.setShaderTexture(0, TEXTURE);
-//    }
 
     public void bookmarkCurrent(){
         if(blueprint.isComplete()){
@@ -257,7 +244,7 @@ public class PlannerScreen extends Screen {
             for (int i = 0; i < blueprint.parts.length; i++) {
                 IToolPart part = blueprint.parts[i];
                 List<IMaterial> usable = materials.stream().filter(part::canUseMaterial).collect(Collectors.toList());
-                if(usable.size() > 0)blueprint.materials[i] = usable.get(r.nextInt(usable.size()));
+                if(!usable.isEmpty())blueprint.materials[i] = usable.get(r.nextInt(usable.size()));
             }
             selectedModifier = null;
             refresh();

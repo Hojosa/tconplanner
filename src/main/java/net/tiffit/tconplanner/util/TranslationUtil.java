@@ -9,5 +9,4 @@ public final class TranslationUtil {
     public static MutableComponent createComponent(String key, Object... inserts){
         return Component.translatable("gui.tconplanner." + key, inserts);
     }
-
 }	

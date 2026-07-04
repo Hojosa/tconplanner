@@ -1,7 +1,6 @@
 package net.tiffit.tconplanner.screen.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -29,12 +28,8 @@ public class OutputToolWidget extends AbstractWidget {
     	guiGraphics.blit(PlannerScreen.TEXTURE, getX() - 6, getY() - 6, 176, 117, 28, 28);
     	guiGraphics.renderItem(this.stack, getX(), getY());
         if(isHovered){
-            renderToolTip(guiGraphics, mouseX, mouseY);
+        	parent.postRenderTasks.add(() -> guiGraphics.renderTooltip(Minecraft.getInstance().font, stack, mouseX, mouseY));
         }
-    }
-
-    public void renderToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        parent.postRenderTasks.add(() -> parent.renderItemTooltip(guiGraphics, this.stack, mouseX, mouseY));
     }
 
     @Override
