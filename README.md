@@ -2,7 +2,7 @@
 
 ![Forge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/forge_vector.svg)
 [![Available on Github](https://rawcdn.githack.com/intergrav/devins-badges/1aec26abb75544baec37249f42008b2fcc0e731f/assets/cozy/available/github_vector.svg)](https://github.com/Hojosa/tconplanner)
-[![Available on Modrinth](https://rawcdn.githack.com/intergrav/devins-badges/1aec26abb75544baec37249f42008b2fcc0e731f/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/sherdsapi)
+[![Available on Modrinth](https://rawcdn.githack.com/intergrav/devins-badges/1aec26abb75544baec37249f42008b2fcc0e731f/assets/cozy/available/modrinth_vector.svg)]([https://modrinth.com/mod/sherdsapi](https://modrinth.com/mod/tinkers-planner-replanned))
 [![Available on Curseforge](https://rawcdn.githack.com/intergrav/devins-badges/1aec26abb75544baec37249f42008b2fcc0e731f/assets/cozy/available/curseforge_vector.svg)]([https://www.curseforge.com/minecraft/mc-mods/sherdsapi](https://www.curseforge.com/minecraft/mc-mods/tinkers-planner-re-planned))
 
 
